@@ -38,15 +38,53 @@ namespace BookStore_API.Controllers
     }
 
     /// <summary>
-    /// User Login endpoint
+    /// User register endpoint
     /// </summary>
     /// <param name="userDTO"></param>
     /// <returns></returns>
+    [Route("register")]
+    [HttpPost]
+    public async Task<IActionResult> Register([FromBody] UserDTO userDTO)
+    {
+      var location = GetControllerActionNames();
+
+      try
+      {
+        var username = userDTO.EmailAddress;
+        var password = userDTO.PassWord;
+        var user = new IdentityUser { Email = username, UserName = username };
+        var result = await _userManager.CreateAsync(user, password);
+        _logger.LogInfo($"{location}: registration attempt for {username}");
+
+        if (!result.Succeeded)
+        {
+          foreach (var error in result.Errors)
+          {
+            _logger.LogError($"{location}: {error.Code} {error.Description}");
+          }
+
+          return InternalError($"{location}: {username} registration attempt failed");
+        }
+
+        return Ok(new { result.Succeeded });//spacing
+      }
+      catch (Exception e)
+      {
+        return InternalError($"{location}: {e.Message} - {e.InnerException}");
+      }
+    }
+
+    /// <summary>
+    /// User login endpoint
+    /// </summary>
+    /// <param name="userDTO"></param>
+    /// <returns></returns>
+    [Route("login")]
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
     {
-      var username = userDTO.UserName;
+      var username = userDTO.EmailAddress;
       var password = userDTO.PassWord;
       var result = await _signInManager.PasswordSignInAsync(username, password, false, false);
     
@@ -80,6 +118,20 @@ namespace BookStore_API.Controllers
         expires: DateTime.Now.AddMinutes(5),
         signingCredentials: credentials);
       return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GetControllerActionNames()
+    {
+      var controller = ControllerContext.ActionDescriptor.ControllerName;
+      var action = ControllerContext.ActionDescriptor.ActionName;
+
+      return $"{controller} - {action}";
+    }
+
+    private ObjectResult InternalError(string message)
+    {
+      _logger.LogError(message);
+      return StatusCode(500, "Something went wrong. Please contact the administrator");
     }
   }
 }
