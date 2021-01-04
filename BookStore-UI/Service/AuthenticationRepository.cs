@@ -76,7 +76,7 @@ namespace BookStore_UI.Service
       var request = new HttpRequestMessage(HttpMethod.Post, Endpoints.RegisterEndpoint)
       {
         Content = new StringContent(JsonConvert.SerializeObject(user),
-         Encoding.UTF8, "aplication/json")
+         Encoding.UTF8, "application/json")
       };
        */
       var request = new HttpRequestMessage(HttpMethod.Post, Endpoints.UserEndpoint + "register/");
