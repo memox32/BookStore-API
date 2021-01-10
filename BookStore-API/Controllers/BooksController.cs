@@ -84,7 +84,7 @@ namespace BookStore_API.Controllers
           return NotFound();
         }
 
-        var response = _mapper.Map<IList<BookDTO>>(book);
+        var response = _mapper.Map<BookDTO>(book);
 
         _logger.LogInfo($"{location}: successfully got record with id: {id}");
 
