@@ -3,6 +3,7 @@ using BookStore_API.Contracts;
 using BookStore_API.Data;
 using BookStore_API.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,13 +25,15 @@ namespace BookStore_API.Controllers
     private readonly IBookRepository _bookRepository;
     private readonly ILoggerService _logger;
     private readonly IMapper _mapper;
+    private readonly IWebHostEnvironment _env;
 
     public BooksController(IBookRepository bookRepository, ILoggerService logger,
-      IMapper mapper)
+      IMapper mapper, IWebHostEnvironment env)
     {
       _bookRepository = bookRepository;
       _logger = logger;
       _mapper = mapper;
+      _env = env;
     }
 
     /// <summary>
@@ -131,7 +134,12 @@ namespace BookStore_API.Controllers
         {
           return InternalError($"{location}: creation failed");
         }
-
+        //if (!string.IsNullOrEmpty(bookDTO.FileString))
+        //{
+        //  var imgPath = $"{_env.ContentRootPath}\\uploads\\{bookDTO.Image}";
+        //  byte[] imageBytes = Convert.FromBase64String(bookDTO.FileString);
+        //  System.IO.File.WriteAllBytes(imgPath, imageBytes);
+        //}
         _logger.LogWarn($"{location}: created");
         return Created("Create", new { book });
       }
